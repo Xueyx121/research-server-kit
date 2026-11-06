@@ -1,0 +1,16 @@
+# General research and data analysis
+numpy
+pandas
+scipy
+scikit-learn
+matplotlib
+seaborn
+jupyterlab
+ipykernel
+requests
+httpx
+python-dotenv
+openai
+
+# Install PyTorch separately after checking the server's CUDA/ROCm setup:
+# https://pytorch.org/get-started/locally/
