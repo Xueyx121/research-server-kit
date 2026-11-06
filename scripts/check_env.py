@@ -2,21 +2,19 @@
 """Report runtime readiness without printing secrets."""
 
 import importlib.metadata
-import os
 import platform
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
-from dotenv import load_dotenv
+from llm_config import get_provider_config
 
 
 PACKAGES = ("numpy", "pandas", "scipy", "scikit-learn", "matplotlib", "jupyterlab", "openai")
 
 
 def main() -> int:
-    load_dotenv()
     print(f"Platform: {platform.platform()}")
     print(f"Python: {sys.version.split()[0]}")
     print(f"Virtual environment: {sys.prefix != sys.base_prefix}")
@@ -38,12 +36,17 @@ def main() -> int:
     else:
         print("NVIDIA GPU: nvidia-smi not found")
 
-    env_file = Path(".env")
+    env_file = Path(__file__).resolve().parent.parent / ".env"
     print(f".env file: {'present' if env_file.is_file() else 'missing'}")
-    print(f"OPENAI_API_KEY: {'set in process environment' if os.getenv('OPENAI_API_KEY') else 'not set in process environment'}")
-    if os.getenv("OPENAI_BASE_URL"):
-        print("OPENAI_BASE_URL: set")
-    return 1 if missing else 0
+    try:
+        config = get_provider_config()
+        print(f"LLM provider: {config.name}")
+        print(f"LLM model: {config.model or 'not set'}")
+        print(f"Provider API key: {'set' if config.api_key else 'not set'}")
+    except ValueError as error:
+        print(f"LLM configuration: {error}")
+        return 1
+    return 1 if missing or not config.api_key or not config.model else 0
 
 
 if __name__ == "__main__":
