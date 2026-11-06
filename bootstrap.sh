@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV_DIR="${VENV_DIR:-${ROOT_DIR}/.venv}"
+VENV_DIR="${ROOT_DIR}/.venv"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 PIP_INDEX_URL="${PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}"
 
@@ -35,8 +35,8 @@ fi
 
 printf 'Installing system packages on %s...\n' "${PRETTY_NAME:-Linux}"
 "${SUDO[@]}" apt-get update
-DEBIAN_FRONTEND=noninteractive "${SUDO[@]}" apt-get install -y \
-  build-essential ca-certificates curl git pkg-config \
+"${SUDO[@]}" env DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  build-essential ca-certificates curl git pkg-config tar xz-utils \
   python3 python3-dev python3-pip python3-venv
 
 if ! command -v "${PYTHON_BIN}" >/dev/null 2>&1; then
@@ -45,15 +45,14 @@ if ! command -v "${PYTHON_BIN}" >/dev/null 2>&1; then
 fi
 
 "${PYTHON_BIN}" -m venv "${VENV_DIR}"
+"${VENV_DIR}/bin/python" -c 'import sys; assert sys.version_info >= (3, 9), "Python 3.9+ required"'
 "${VENV_DIR}/bin/python" -m pip install --upgrade pip setuptools wheel \
   --index-url "${PIP_INDEX_URL}"
 "${VENV_DIR}/bin/python" -m pip install -r "${ROOT_DIR}/requirements.txt" \
   --index-url "${PIP_INDEX_URL}"
 
 if [[ ! -e "${ROOT_DIR}/.env" ]]; then
-  cp "${ROOT_DIR}/.env.example" "${ROOT_DIR}/.env"
-  chmod 600 "${ROOT_DIR}/.env"
+  (umask 077; set -o noclobber; cat "${ROOT_DIR}/.env.example" > "${ROOT_DIR}/.env")
 fi
 
-printf '\nSetup complete. Activate the environment with:\n  source %q/bin/activate\n' "${VENV_DIR}"
-printf 'Edit %s/.env to configure API credentials.\n' "${ROOT_DIR}"
+printf '\nPython research packages installed.\n'
