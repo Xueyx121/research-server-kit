@@ -1,0 +1,24 @@
+# Reference config for a clean Linux Codex CLI installation.
+# run_codex.py supplies these settings without overwriting ~/.codex/config.toml.
+# Provider auth uses env_key, so do not copy auth.json or set requires_openai_auth.
+model = "gpt-6-sol"
+model_provider = "sorux"
+model_reasoning_effort = "high"
+disable_response_storage = true
+sandbox_mode = "workspace-write"
+approval_policy = "never"
+
+[sandbox_workspace_write]
+network_access = true
+
+[model_providers.sorux]
+name = "Sorux"
+base_url = "https://ai.soruxgpt.com/v1"
+wire_api = "responses"
+env_key = "SORUX_API_KEY"
+
+[model_providers.transformcat]
+name = "Transformcat"
+base_url = "https://www.transformcat.cn/"
+wire_api = "responses"
+env_key = "TRANSFORMCAT_API_KEY"
